@@ -76,7 +76,9 @@ Dataset tersebut memiliki 21 kolom/variabel dengan jumlah baris/data sebanyak 20
 
 Berikut kondisi dataset setelah melalui beberapa proses seperti Handling suplicate Value dan Handling Missing Value
 
-![alt text](duplicate_value.png) ![alt text](missing_value.png)
+duplicate_value.png
+
+missing_value.png
 
 Dataset tidak memiliki value yang duplikat dan dataset tidak memiliki data yang hilang/*missing*
 
@@ -86,13 +88,13 @@ Dataset tidak memiliki value yang duplikat dan dataset tidak memiliki data yang 
 Beberapa teknik EDA yang digunakan: 
 - **Metode IQR** : Menggunakan Boxplot untuk memahami distribusi dan keberadaan outlier pada fitur numerik
 
-![alt text](boxplot.png)
+boxplot.png
 
 Dapat dilihat pada setiap variabel numerik, cenderung memiliki distribusi normal. Walaupun ada beberapa variabel yang memiliki outlier, tetapi jumlah outliernya tidak banyak. Kemungkinan, data ini merupakah Mobile Phone yang memang memiliki fitur yang cukup unik dibanding dengan data mobile phone yang lain
 
 - **Korelasi antar fitur**: Menggunakan correlation matrix untuk menganalisis korelasi antar fitur. 
 
-![alt text](correlation_matrix.png)
+correlation_matrix.png
 
 Dapat dilihat dalam correlation matrix, 
 
@@ -105,7 +107,7 @@ Untuk variabel yang tidak memiliki korelasi dan sangat rendah korelasinya, saya 
 
 - **Distribusi kategori**: Menggunakan bar plot untuk melihat distribusi fitur kategori. 
 
-![alt text](cat_features.png)
+cat_features.png
 
 Pada beberapa fitur yang valuenya dalam bentuk kategorikal, distribusinya cenderung seimbang. Hanya 1 fitur `three_g` yang memiliki distribusi yang tidak seimbang/cukup jomplang
 
@@ -200,31 +202,31 @@ Pada bagian ini, kami akan membahas metrik evaluasi yang digunakan untuk mengeva
    Akurasi mengukur persentase prediksi yang benar dari seluruh prediksi yang dibuat oleh model. Metrik ini sangat berguna ketika distribusi kelas dalam dataset relatif seimbang.
 
    Formula:  
-   ![alt text](Akurasi.png)
+   Akurasi.png
 
 2. **Precision**  
    Precision mengukur berapa banyak dari prediksi positif yang benar-benar positif. Metrik ini penting ketika biaya kesalahan tipe I (false positive) cukup tinggi, yaitu saat model memprediksi positif namun sebenarnya tidak benar.
 
    Formula:  
-   ![alt text](presisi.png)
+   presisi.png
 
 3. **Recall (Sensitivity)**  
    Recall mengukur berapa banyak data positif yang berhasil terdeteksi oleh model. Metrik ini penting ketika biaya kesalahan tipe II (false negative) tinggi, misalnya dalam mendeteksi kasus yang seharusnya diidentifikasi.
 
    Formula:  
-   ![alt text](recall.png)
+   recall.png
 
 4. **F1-Score**  
    F1-Score adalah rata-rata harmonis antara Precision dan Recall. Metrik ini memberikan gambaran yang lebih seimbang antara Precision dan Recall, terutama saat data tidak seimbang atau ketika keseimbangan antara keduanya penting.
 
    Formula:  
-   ![alt text](f1score.png)
+   f1score.png
 
 #### Hasil Evaluasi Berdasarkan Metrik
 
 Setelah melatih dan menguji ketiga model, berikut adalah hasil evaluasi berdasarkan metrik yang telah dijelaskan:
 
-![alt text](model_evaluation-1.png)
+model_evaluation-1.png
 
 - **CatBoost**:  
   - **Akurasi**: 95%  
