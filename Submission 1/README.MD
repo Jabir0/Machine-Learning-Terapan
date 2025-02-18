@@ -82,6 +82,7 @@ Dataset tersebut memiliki 21 kolom/variabel dengan jumlah baris/data sebanyak 20
 Berikut kondisi dataset setelah melalui beberapa proses seperti Handling suplicate Value dan Handling Missing Value
 
 ![alt text](duplicate_value.png)
+
 ![alt text](missing_value.png)
 
 Dataset tidak memiliki value yang duplikat dan dataset tidak memiliki data yang hilang/_missing_
