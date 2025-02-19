@@ -1,292 +1,284 @@
+# Laporan Proyek Machine Learning - Jabir Muktabir
 
----
-## Laporan Proyek Machine Learning - Jabir Muktabir
----
+## Project Overview
 
-## Domain Proyek
+Sistem rekomendasi telah menjadi bagian penting dalam berbagai industri, terutama dalam bidang e-commerce dan hiburan. Dengan semakin meningkatnya jumlah buku yang tersedia secara daring, pengguna sering kali kesulitan menemukan buku yang sesuai dengan preferensi mereka. Oleh karena itu, sistem rekomendasi buku menjadi solusi untuk membantu pengguna menemukan buku yang relevan berdasarkan data historis dan perilaku mereka.
 
-Pada era persaingan ketat di industri ponsel, perusahaan baru sulit bersaing dengan merek ternama seperti Apple dan Samsung. Estimasi harga yang tepat menjadi faktor kunci dalam menentukan daya saing produk. Bob, seorang pengusaha yang baru memulai bisnis ponsel, ingin mengatasi tantangan ini dengan menemukan hubungan antara fitur ponsel (seperti RAM, memori internal, dll.) dan rentang harga jual.
+Dataset yang digunakan dalam proyek ini berasal dari [Kaggle - Book Recommendation Dataset](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset), yang dikumpulkan dari komunitas Book-Crossing pada tahun 2004. Dataset ini terdiri dari tiga bagian utama: data pengguna, data buku, dan data rating buku.
 
-**Mengapa masalah ini penting?**
-
-- Estimasi harga yang akurat dapat membantu dalam **strategi pemasaran** dan **penentuan segmentasi pasar** yang tepat.
-- Meminimalkan **kerugian finansial** akibat salah penetapan harga.
-
-**Referensi**:
-
-- [K-BEST SELECTION UNTUK MENINGKATKAN KINERJA ARTIFICIAL NEURAL NETWORK DALAM MEMPREDIKSI RANGE HARGA PONSEL](https://ejournal.nusamandiri.ac.id/index.php/inti/article/view/5554)
-- [ANALISIS PENGARUH CITRA MERK, KUALITAS PRODUK, HARGA DAN PROMOSI TERHADAP KEPUTUSAN PEMBELIAN SMARTPHONE SAMSUNG DI MAKASSAR](https://ojs.unsulbar.ac.id/index.php/mandar/article/view/864)
-
----
+Referensi terkait:
+- [T. Monisya Afriyanti and E. Retnoningsih, “Sistem Rekomendasi Buku Perpustakaan Menggunakan Algoritma Frequent Pattern Growth Library Book Recommendation System using Frequent Pattern Growth Algorithm,” Techno.COM, vol. 21, no. 2, pp. 292–310, May 2022.](https://core.ac.uk/download/pdf/521875503.pdf)
 
 ## Business Understanding
 
 ### Problem Statements
-
-1. **Bagaimana menentukan rentang harga ponsel berdasarkan fitur-fitur teknis?**
-2. **Algoritma machine learning apa yang paling efektif untuk mengklasifikasikan rentang harga ponsel?**
-3. **Bagaimana performa model dalam hal akurasi, presisi, recall, dan F1-Score pada data ini?**
-
----
+1. Bagaimana cara memberikan rekomendasi buku yang relevan bagi pengguna berdasarkan rating yang diberikan?
+2. Bagaimana meningkatkan pengalaman pengguna dengan memberikan rekomendasi yang dipersonalisasi?
 
 ### Goals
+1. Mengembangkan sistem rekomendasi yang dapat menyarankan buku berdasarkan rating dan preferensi pengguna.
+2. Menganalisis dan membandingkan beberapa metode rekomendasi untuk menemukan pendekatan terbaik.
 
-- **Menentukan hubungan antara fitur teknis ponsel dan rentang harga.**
-- **Membangun model klasifikasi yang akurat untuk mengelompokkan harga ponsel.**
-- **Mengevaluasi performa model menggunakan metrik akurasi, presisi, recall, dan F1-Score.**
+### **Solution Approach**  
+
+#### **Solution Statements**  
+Untuk membangun sistem rekomendasi buku yang efektif, pendekatan berikut digunakan:  
+
+1. **Content-Based Filtering dengan TF-IDF**  
+   - Model ini menggunakan **TF-IDF (Term Frequency-Inverse Document Frequency)** untuk mengekstrak fitur dari metadata buku (judul, penulis, dan penerbit).  
+   - Kesamaan antar buku dihitung menggunakan **Cosine Similarity** untuk merekomendasikan buku yang paling mirip dengan buku yang telah dinilai pengguna.  
+
+2. **Collaborative Filtering dengan Recommender Net**  
+   - Menggunakan model **Neural Collaborative Filtering (NCF)** berbasis **Recommender Net**, yang memanfaatkan **embedding layer** untuk pengguna dan buku.  
+   - Model ini dilatih untuk memprediksi rating buku berdasarkan interaksi pengguna dan menghasilkan rekomendasi personal berdasarkan pola preferensi pengguna lainnya.  
+
+3. **Evaluasi Model dengan Metrik yang Sesuai**  
+   - **Content-Based Filtering** dievaluasi menggunakan **Cosine Similarity** untuk mengukur kesamaan antara buku-buku rekomendasi.  
+   - **Collaborative Filtering** dievaluasi menggunakan **Root Mean Squared Error (RMSE)** untuk mengukur akurasi prediksi rating yang diberikan oleh model.  
+---
+
+## **Data Understanding**  
+
+Dataset yang digunakan dalam proyek ini terdiri dari tiga file utama:  
+
+### **1. Users.csv**  
+Berisi informasi tentang pengguna yang memberikan rating buku. Dataset ini memiliki **278.858 entri** dengan tiga kolom utama:  
+- **`User-ID`**: ID unik pengguna (tidak memiliki nilai yang hilang).  
+- **`Location`**: Lokasi pengguna dalam format teks.  
+- **`Age`**: Usia pengguna (banyak nilai yang kosong, hanya tersedia untuk **168.096 entri**).  
+
+### **2. Books.csv**  
+Berisi informasi tentang buku yang tersedia dalam dataset, dengan **271.360 entri** dan delapan kolom utama:  
+- **`ISBN`**: Identifikasi unik untuk setiap buku (tidak memiliki nilai yang hilang).  
+- **`Book-Title`**: Judul buku.  
+- **`Book-Author`**: Nama penulis buku (**2 nilai kosong**).  
+- **`Year-Of-Publication`**: Tahun buku diterbitkan.  
+- **`Publisher`**: Nama penerbit (**2 nilai kosong**).  
+- **`Image-URL-S`**, **`Image-URL-M`**, **`Image-URL-L`**: URL gambar sampul buku dalam berbagai ukuran (**1 nilai kosong untuk `Image-URL-L`**).  
+
+### **3. Ratings.csv**  
+Berisi data rating buku yang diberikan oleh pengguna dengan total **1.149.780 entri**, yang terdiri dari tiga kolom utama:  
+- **`User-ID`**: ID pengguna yang memberikan rating.  
+- **`ISBN`**: Identifikasi unik buku yang diberi rating.  
+- **`Book-Rating`**: Skor rating buku dalam skala **1-10** (rating eksplisit) dan **0** untuk indikasi bahwa pengguna memiliki buku tersebut tetapi tidak memberikan rating eksplisit (rating implisit).  
 
 ---
 
-### Solution Statements
+![univariate_analysis](https://github.com/user-attachments/assets/f0187177-48be-4730-a119-ecb7319d0029)
 
-- Menggunakan **tiga algoritma klasifikasi**:
-  1. **CatBoost**: Algoritma boosting yang kuat dalam menangani fitur kategori dan **overfitting yang rendah**.
-  2. **AdaBoost**: Algoritma boosting adaptif yang cocok untuk **imbalance data**.
-  3. **Random Forest**: Algoritma ensemble dengan **interpretabilitas yang baik** dan **stabil terhadap outlier**.
-- **Hyperparameter tuning** pada masing-masing model untuk **memaksimalkan performa**.
-- **Metrik evaluasi yang digunakan**: Akurasi, Presisi, Recall, dan F1-Score.
+## **Insight dari Data**  
+1. Dari total **278.858 pengguna**, hanya **1.149.780 entri** yang berisi rating buku, menunjukkan bahwa tidak semua pengguna memberikan rating.  
+2. Dari **271.360 buku** yang terdaftar dalam dataset, sebanyak **340.556 buku** telah menerima rating. Perbedaan jumlah ini kemungkinan disebabkan oleh adanya buku yang tercatat dalam data rating tetapi tidak terdaftar dalam data buku.  
+3. Terdapat total **102.024 penulis** yang terdaftar dalam dataset.  
+4. Skala rating buku berkisar antara **1 hingga 10**.  
+5. Terdapat perbedaan jumlah buku dan ISBN, yang kemungkinan disebabkan oleh **keberadaan beberapa versi berbeda dari buku yang sama** (misalnya edisi berbeda, cetakan ulang, atau format yang berbeda seperti paperback dan hardcover).  
+
+---
+# **Data Preparation**  
+
+Sebelum data digunakan untuk membangun model rekomendasi, dilakukan beberapa langkah **persiapan data** untuk memastikan kualitas dan efisiensi pemrosesan.  
+
+### **1. Data Merging**  
+Untuk menghubungkan data rating dengan informasi buku, dilakukan **penggabungan (merging) data** antara dataset **ratings** dan **books** berdasarkan ISBN. Hal ini bertujuan untuk menambahkan informasi tambahan seperti judul buku, penulis, dan penerbit ke dalam dataset rating.  
+
+Kode yang digunakan untuk melakukan **data merging**:  
+```python
+data_rating_buku = pd.merge(
+    ratings,
+    books,
+    on = 'ISBN',
+    how = 'left'
+)
+data_rating_buku
+```
+Metode **left join** digunakan agar setiap entri rating tetap dipertahankan, meskipun beberapa ISBN mungkin tidak ditemukan dalam dataset buku.  
+
+### **2. Missing Values Handling**  
+Beberapa kolom dalam dataset memiliki **nilai yang hilang (missing values)**. Untuk mengatasi hal ini, dilakukan **penghapusan (drop)** entri yang memiliki nilai kosong, terutama pada kolom-kolom penting seperti **judul buku (Book-Title)** dan **penulis (Book-Author)**.  
+
+```python
+data_rating_buku = data_rating_buku.dropna()
+```
+
+### **3. Duplicates Data Handling**  
+Data yang memiliki **duplikasi (duplicate entries)** dapat memengaruhi hasil model. Oleh karena itu, dilakukan **penghapusan duplikasi** berdasarkan kombinasi **User-ID dan ISBN** untuk memastikan bahwa setiap pengguna hanya memberikan satu rating untuk satu buku.  
+
+```python
+#Menghitung jumlah data yang duplikat
+duplicate_count_isbn = data_rating_buku['ISBN'].duplicated().sum()
+duplicate_count_title = data_rating_buku['Book-Title'].duplicated().sum()
+
+print(f"Number of duplicates in the 'ISBN' column : {duplicate_count_isbn}")
+print(f"Number of duplicated in the 'Book-Title' column : {duplicate_count_title}")
+
+#Menghapus data yang duplikat
+data_rating_buku = data_rating_buku.drop_duplicates(subset='ISBN')
+data_rating_buku = data_rating_buku.drop_duplicates(subset='Book-Title')
+```
+
+### **4. Data Selection**  
+Dataset ini memiliki **241.065 entri**, yang cukup besar untuk diproses. Demi efisiensi serta mempertimbangkan keterbatasan penyimpanan di **Kaggle**, hanya digunakan **30.000 entri teratas** berdasarkan jumlah rating yang diberikan oleh pengguna.  
+
+```python
+data_rating_buku = data_rating_buku.head(30000)
+```
 
 ---
 
-## Data Understanding
+## **Data Preparation - Collaborative Filtering**  
 
-Dataset yang digunakan adalah **Mobile Price Classification Dataset**, yang berisi informasi mengenai spesifikasi teknis ponsel dan rentang harga.  
-Dataset dapat diakses di: [Mobile Price Classification Dataset](https://www.kaggle.com/datasets/iabhishekofficial/mobile-price-classification)
+Sistem rekomendasi yang akan dibangun menggunakan pendekatan **Collaborative Filtering**. Sebelum memasuki tahap pelatihan model, dilakukan beberapa proses tambahan:  
 
-Dataset tersebut memiliki 21 kolom/variabel dengan jumlah baris/data sebanyak 2000 data. Dibawah ini merupakan variabel-variabel dalam dataset **Mobile Price Classification**
+1. **Encoding dan Mapping**  
+   - Mengonversi data menjadi format numerik agar dapat diproses oleh model.  
+   - ISBN dan User-ID dikonversi ke dalam indeks numerik untuk mempermudah pemrosesan.  
 
-### Variabel-variabel pada dataset:
+   ```python
+   # Mendapatkan daftar user ID yang unik
+    user_ids = df['User-ID'].unique().tolist()
 
-- **battery_power** = Total energi yang dapat disimpan oleh baterai dalam satu kali pengisian daya, diukur dalam mAh
-- **blue** = Apakah memiliki fitur Bluetooth atau tidak
-- **clock_speed** = Kecepatan prosesor dalam mengeksekusi instruksi
-- **dual_sim** = Apakah mendukung dual SIM atau tidak
-- **fc** = Megapiksel kamera depan
-- **four_g** = Apakah mendukung 4G atau tidak
-- **int_memory** = Memori internal dalam Gigabyte
-- **m_dep** = Ketebalan ponsel dalam cm
-- **mobile_wt** = Berat ponsel
-- **n_cores** = Jumlah inti (core) pada prosesor
-- **pc** = Megapiksel kamera utama
-- **px_height** = Resolusi tinggi piksel layar
-- **px_width** = Resolusi lebar piksel layar
-- **ram** = Random Access Memory dalam Megabyte
-- **sc_h** = Tinggi layar ponsel dalam cm
-- **sc_w** = Lebar layar ponsel dalam cm
-- **talk_time** = Waktu terlama yang bisa dicapai dengan satu kali pengisian baterai saat digunakan untuk panggilan
-- **three_g** = Apakah mendukung 3G atau tidak
-- **touch_screen** = Apakah memiliki layar sentuh atau tidak
-- **wifi** = Apakah memiliki fitur WiFi atau tidak
-- **price_range** = Variabel target dengan nilai: 0 (biaya rendah), 1 (biaya menengah), 2 (biaya tinggi), dan 3 (biaya sangat tinggi)
+    # Membuat encoding user ID
+    encode_user_id1 = {user_id: index for index, user_id in enumerate(user_ids)}
+    encoded_user_id2 = {index: user_id for index, user_id in enumerate(user_ids)}
 
-Berikut kondisi dataset setelah melalui beberapa proses seperti Handling suplicate Value dan Handling Missing Value
+    # Mendapatkan daftar judul buku yang unik
+    titles = df['Book-Title'].unique().tolist()
 
-![duplicate_value](https://github.com/user-attachments/assets/2fbe231e-e2db-4287-ae33-d89ed4d28be9)
+    # Membuat encoding untuk judul buku
+    encode_title1 = {title: index for index, title in enumerate(titles)}
+    encoded_title2 = {index: title for index, title in enumerate(titles)}
 
-![missing_value](https://github.com/user-attachments/assets/f481b277-0e9b-4468-85cd-019228b9efb9)
+    #Mengubah kolom user dan books dengan menggunakan peta encode
+    df['user'] = df['User-ID'].apply(lambda x : encode_user_id1[x])
+    df['books'] = df['Book-Title'].apply(lambda x : encode_title1[x])
+   ```
+
+2. **Pengambilan Sampel Acak**  
+   - Untuk memastikan distribusi data yang lebih merata, dilakukan pemilihan sampel data secara acak.  
+
+   ```python
+   df = df.sample(frac = 1, random_state = 123)
+   ```
+
+3. **Pembagian Data Latih dan Uji**  
+   - Data dibagi menjadi **train set (80%)** dan **test set (20%)** untuk mengevaluasi performa model.  
+
+   ```python
+   #Menampung nilai dari kolom 'user' dan 'books' dalan variabel x
+    x = df[['user','books']].values
+    #Normalisasi nilai 'Book-Rating'
+    y = df['Book-Rating'].apply(lambda rating: (rating - min_rating) / (max_rating - min_rating))
+
+    #Membagi data menjadi training dan validation set
+    split_index = int(0.8 * len(df))
+    x_train, x_val = x[:split_index], x[split_index:]
+    y_train,y_val = y[:split_index], y[split_index:]
+   ```
+
+---
+## **Modeling**  
+
+Pada tahap ini, model sistem rekomendasi dikembangkan untuk memberikan rekomendasi buku kepada pengguna berdasarkan pola interaksi mereka dengan buku. Model akan menyajikan **Top-N Recommendation** sebagai output utama.  
+
+Sistem rekomendasi yang digunakan terdiri dari dua pendekatan utama:  
+
+### **1. Content-Based Filtering**  
+Pendekatan ini merekomendasikan buku berdasarkan kemiripan fitur buku, seperti **judul**, **penulis**, dan **penerbit**. Model menggunakan **TF-IDF (Term Frequency-Inverse Document Frequency)** untuk mengekstrak fitur dari metadata buku dan mengukur kesamaan antar buku menggunakan **Cosine Similarity**.  
+
+#### **Langkah-langkah:**
+1. **Ekstraksi Fitur dengan TF-IDF:**  
+   - Representasi teks buku dikonversi menjadi vektor numerik menggunakan TF-IDF.  
+2. **Pengukuran Kesamaan dengan Cosine Similarity:**  
+   - Menghitung kemiripan antara buku berdasarkan vektor TF-IDF.  
+3. **Pembuatan Rekomendasi:**  
+   - Jika pengguna menyukai buku tertentu, model akan merekomendasikan buku lain yang memiliki kesamaan tinggi dengan buku tersebut. 
+
+Dengan hasil rekomendasinya sebagai berikut :
+
+![tf_idf_rekomendasi](https://github.com/user-attachments/assets/a86b7b4f-8866-4e54-8925-b72eb841bd3b)
 
 
+#### **Kelebihan & Kekurangan Content-Based Filtering**  
+✅ **Kelebihan:**  
+- Mampu memberikan rekomendasi meskipun tidak banyak interaksi pengguna.  
+- Tidak mengalami masalah *cold start* untuk buku baru karena hanya bergantung pada fitur buku.  
 
-Dataset tidak memiliki value yang duplikat dan dataset tidak memiliki data yang hilang/_missing_
+❌ **Kekurangan:**  
+- Memerlukan representasi fitur yang baik untuk hasil optimal.  
+- Rekomendasi cenderung terbatas pada buku yang mirip dengan yang telah dinilai pengguna (*serendipity* rendah).  
 
 ---
 
-### Exploratory Data Analysis (EDA)
+### **2. Collaborative Filtering (Recommender Net)**  
+Pendekatan ini merekomendasikan buku berdasarkan pola kesukaan pengguna lain yang memiliki preferensi serupa. Model yang digunakan adalah **Recommender Net**, sebuah model berbasis **Neural Collaborative Filtering** (NCF) yang terdiri dari embedding layer untuk pengguna dan buku.  
 
-Beberapa teknik EDA yang digunakan:
+#### **Langkah-langkah:**  
+1. **Encoding User dan ISBN ke dalam Representasi Numerik.**  
+2. **Embedding Layer:**  
+   - Mentransformasikan data pengguna dan buku ke dalam representasi **latent factor**.  
+3. **Fully Connected Layers:**  
+   - Menggunakan beberapa lapisan jaringan saraf untuk menangkap interaksi kompleks antara pengguna dan buku.  
+4. **Prediksi Rating:**  
+   - Model akan memprediksi rating yang mungkin diberikan pengguna untuk buku tertentu.  
 
-- **Metode IQR** : Menggunakan Boxplot untuk memahami distribusi dan keberadaan outlier pada fitur numerik
+Dengan hasil rekomendasinya sebagai berikut :
 
-![boxplot](https://github.com/user-attachments/assets/039785e2-4ab9-4c2c-a65a-8d0bd300bdef)
-
-
-Dapat dilihat pada setiap variabel numerik, cenderung memiliki distribusi normal. Walaupun ada beberapa variabel yang memiliki outlier, tetapi jumlah outliernya tidak banyak. Kemungkinan, data ini merupakah Mobile Phone yang memang memiliki fitur yang cukup unik dibanding dengan data mobile phone yang lain
-
-- **Korelasi antar fitur**: Menggunakan correlation matrix untuk menganalisis korelasi antar fitur.
-
-![correlation_matrix](https://github.com/user-attachments/assets/f095275d-e9c5-4bca-9661-c9e4e364c3a5)
+![recomendernet_rekomendasi](https://github.com/user-attachments/assets/068106e5-059f-45e1-a6eb-200757e0c4ff)
 
 
-Dapat dilihat dalam correlation matrix,
+#### **Kelebihan & Kekurangan Collaborative Filtering**  
+✅ **Kelebihan:**  
+- Dapat menangkap pola kesukaan pengguna tanpa memerlukan metadata buku.  
+- Mampu memberikan rekomendasi lebih bervariasi dibandingkan Content-Based Filtering.  
 
-- beberapa variabel tidak memiliki korelasi (0 korelasi), contohnya `m_dep`,`n_cores`
-- beberapa variabel yang korelasinya sangat rendah, contohnya `clock_speed`,`four_g`
-- beberapa variabel yang cukup rendah korelasinya, contohnya `blue`, `dual_sim`, `fc`, `int_memory`, `mobile_wt`, `pc`, `sc_h`, `sc_w`, `talk_time`, `three_g`, `touch_screen`, `wifi`
-- beberapa variabel yang tinggi korelasinya, contohnya `battery_power`, `px_height`, `px_width`, `ram`
-
-Untuk variabel yang tidak memiliki korelasi dan sangat rendah korelasinya, saya tidak akan pakai
-
-- **Distribusi kategori**: Menggunakan bar plot untuk melihat distribusi fitur kategori.
-
-![cat_features](https://github.com/user-attachments/assets/230f3598-5b41-4b64-aa8b-d58473202c8e)
-
-Pada beberapa fitur yang valuenya dalam bentuk kategorikal, distribusinya cenderung seimbang. Hanya 1 fitur `three_g` yang memiliki distribusi yang tidak seimbang/cukup jomplang antara kategori Yes/No
+❌ **Kekurangan:**  
+- Membutuhkan data rating yang cukup besar agar model dapat bekerja dengan baik.  
+- Mengalami masalah *cold start* untuk pengguna baru yang belum memiliki interaksi.  
 
 ---
 
-## Data Preparation
+## **Evaluation**  
 
-**Teknik data preparation yang diterapkan**:
+Evaluasi dilakukan untuk mengukur performa sistem rekomendasi yang telah dibangun menggunakan metrik yang sesuai dengan masing-masing pendekatan.
 
-- **Menghapus/drop fitur-fitur dalam dataset** : Untuk menghapus variabel-variabel yang korelasinya sangat rendah dan yang tidak memiliki korelasi terhadap variabel target, yaitu `m_dep`, `n_cores`, `clock_speed`, `four_g` . Hal ini bertujuan untuk mengurangi kompleksitas model dalam mempelajari dataset.
-- **Normalisasi fitur numerik**: Menggunakan **Min-Max Scaling** untuk fitur.
-- **Split data**: Membagi dataset menjadi **90% data latih** dan **10% data uji** dengan `train_test_split`.
+### **1. Evaluasi Content-Based Filtering**  
+Model Content-Based Filtering dievaluasi menggunakan **Cosine Similarity**, yang mengukur sejauh mana dua buku memiliki kesamaan berdasarkan fitur TF-IDF.  
 
-**Alasan**:
+#### **Formula Cosine Similarity:**  
 
-- **Normalisasi** membantu **menyelaraskan skala fitur** sehingga setiap fitur memiliki kontribusi yang setara dalam model, serta **mempercepat konvergensi model** karena algoritma dapat lebih cepat menemukan solusi optimal.
+![cosine_similarity](https://github.com/user-attachments/assets/3075e829-fc23-4a83-867d-02161db0711a)
 
----
 
-### Modeling
+di mana:  
+- \( A \) dan \( B \) adalah vektor representasi TF-IDF dari dua buku yang dibandingkan.  
+- Nilai berkisar antara **0 hingga 1** (semakin mendekati 1, semakin mirip).  
 
-Tahapan ini membahas mengenai model machine learning yang digunakan untuk menyelesaikan permasalahan klasifikasi. Model yang digunakan adalah **CatBoost**, **AdaBoost**, dan **Random Forest**. Di bawah ini akan dijelaskan cara kerja tiap model, kelebihan dan kekurangannya, serta proses hyperparameter tuning yang dilakukan untuk meningkatkan performa model.
-
-#### 1. **CatBoost**
-
-- **Cara Kerja**:  
-  CatBoost adalah algoritma boosting yang berfokus pada peningkatan performa model dengan menangani fitur kategori secara otomatis tanpa perlu encoding manual. CatBoost bekerja dengan cara membangun pohon keputusan secara bertahap, dimana model sebelumnya digunakan untuk memprediksi error model berikutnya. Hal ini memungkinkan model untuk belajar dan mengurangi error secara iteratif.
-
-  **Kelebihan**:
-
-  - Menangani fitur kategori dengan baik.
-  - Overfitting yang rendah pada data yang kompleks.
-  - Efisien dalam pemrosesan data besar.
-
-  **Kekurangan**:
-
-  - Dapat membutuhkan waktu pelatihan yang lebih lama untuk dataset besar.
-  - Lebih rumit dibandingkan dengan model lain seperti Random Forest.
-
-- **Hyperparameter yang Digunakan**:
-  - `iterations`: 100
-  - `learning_rate`: 0.5
-  - `depth`: 6
-  - `verbose`: 0 (untuk menghindari output berlebihan selama pelatihan)
-  - `random_seed`: 42 (untuk memastikan replikasi hasil)
-
-#### 2. **AdaBoost**
-
-- **Cara Kerja**:  
-  AdaBoost adalah algoritma ensemble yang menggabungkan beberapa model lemah (weak learners) menjadi satu model yang lebih kuat. Pada setiap iterasi, model yang lebih lemah dilatih untuk mengurangi kesalahan model sebelumnya dengan meningkatkan bobot data yang salah diklasifikasikan. Hal ini memungkinkan AdaBoost untuk fokus lebih pada data yang sulit diklasifikasikan.
-
-  **Kelebihan**:
-
-  - Meningkatkan performa model lemah.
-  - Stabil terhadap noise dan data yang tidak seimbang.
-
-  **Kekurangan**:
-
-  - Sensitif terhadap outlier.
-  - Dapat mengalami overfitting jika jumlah iterasi terlalu banyak.
-
-- **Hyperparameter yang Digunakan**:
-  - `n_estimators`: 100
-  - `learning_rate`: 0.5
-  - `random_state`: 42 (untuk replikasi hasil yang konsisten)
-
-#### 3. **Random Forest**
-
-- **Cara Kerja**:  
-  Random Forest adalah model ensemble yang membangun banyak pohon keputusan (decision trees) secara acak dan kemudian menggabungkan prediksi dari masing-masing pohon. Setiap pohon dibangun menggunakan subset acak dari data dan fitur, yang membuatnya lebih robust terhadap overfitting. Model ini dapat menangani data numerik dan kategori dengan baik serta lebih stabil terhadap outlier.
-
-  **Kelebihan**:
-
-  - Robust terhadap outlier dan data yang hilang.
-  - Tidak mudah mengalami overfitting pada dataset besar.
-
-  **Kekurangan**:
-
-  - Model yang kompleks dan sulit untuk diinterpretasikan.
-  - Dapat memerlukan lebih banyak waktu dan sumber daya untuk pelatihan dibandingkan dengan model lainnya.
-
-- **Hyperparameter yang Digunakan**:
-  - `n_estimators`: 100
-  - `max_depth`: 6
-  - `random_state`: 42 (untuk replikasi hasil yang konsisten)
-
-#### Proses Hyperparameter Tuning
-
-Untuk setiap model, proses tuning dilakukan untuk mengoptimalkan kinerja model. Parameter yang dipilih berdasarkan kombinasi eksperimen dan evaluasi kinerja model terhadap data uji. Pemilihan nilai parameter dilakukan untuk mencapai keseimbangan antara kompleksitas model dan generalisasi yang baik.
-
-### Pemilihan Model Terbaik
-
-Setelah menjalankan ketiga model, hasil evaluasi menunjukkan bahwa **CatBoost** memberikan hasil terbaik dengan akurasi yang lebih tinggi dibandingkan dengan model lainnya. Oleh karena itu, **CatBoost** dipilih sebagai model terbaik untuk solusi ini. Keunggulan CatBoost dalam menangani fitur kategori secara otomatis dan kemampuannya untuk mengurangi overfitting pada data yang kompleks menjadi alasan utama pemilihan ini.
+#### **Interpretasi Hasil:**  
+- Jika nilai cosine similarity tinggi, rekomendasi yang dihasilkan dianggap relevan.  
+- Model diuji dengan membandingkan hasil rekomendasi terhadap buku-buku yang telah dinilai pengguna sebelumnya.  
 
 ---
 
-### Evaluation
+### **2. Evaluasi Collaborative Filtering (Recommender Net)**  
+Model Collaborative Filtering dievaluasi menggunakan **Root Mean Squared Error (RMSE)** untuk mengukur perbedaan antara rating yang diprediksi dan rating yang sebenarnya diberikan pengguna.  
 
-Pada bagian ini, kami akan membahas metrik evaluasi yang digunakan untuk mengevaluasi kinerja model klasifikasi di tahap Modeling , serta menjelaskan hasil yang diperoleh berdasarkan metrik-metrik tersebut. Metrik evaluasi yang digunakan dalam proyek ini adalah **Akurasi**, **Precision**, **Recall**, dan **F1-Score**. Metrik ini dipilih karena relevan dengan konteks klasifikasi yang dilakukan pada dataset ini dan memberikan gambaran yang komprehensif mengenai kinerja model.
+#### **Formula RMSE:**  
 
-#### Penjelasan Metrik Evaluasi
-
-1. **Akurasi**  
-   Akurasi mengukur persentase prediksi yang benar dari seluruh prediksi yang dibuat oleh model. Metrik ini sangat berguna ketika distribusi kelas dalam dataset relatif seimbang.
-
-   Formula:  
-   ![Akurasi](https://github.com/user-attachments/assets/75f2e634-12ed-4216-be7f-881c4889f2cf)
+![rmse](https://github.com/user-attachments/assets/6a5136f1-211e-465a-9721-45c8ae2f25f5)
 
 
-2. **Precision**  
-   Precision mengukur berapa banyak dari prediksi positif yang benar-benar positif. Metrik ini penting ketika biaya kesalahan tipe I (false positive) cukup tinggi, yaitu saat model memprediksi positif namun sebenarnya tidak benar.
+di mana:  
+- \( y_i \) adalah rating aktual dari pengguna untuk buku tertentu.  
+- \( y^_i \) adalah rating yang diprediksi oleh model.  
+- Semakin kecil nilai RMSE, semakin akurat prediksi model.  
 
-   Formula:  
-   ![presisi](https://github.com/user-attachments/assets/7af5650d-31f9-48c2-8b8c-15131075f384)
+#### **Visualisasi Kinerja Model dalam Metode Evaluasi RMSE:**  
+![rekomendernet_collaborative_evaluation](https://github.com/user-attachments/assets/6d3b4f3a-ad2d-4234-aa89-baeab8a84005)
 
+- Jika RMSE rendah, berarti prediksi model mendekati rating sebenarnya yang diberikan pengguna.  
 
-3. **Recall (Sensitivity)**  
-   Recall mengukur berapa banyak data positif yang berhasil terdeteksi oleh model. Metrik ini penting ketika biaya kesalahan tipe II (false negative) tinggi, misalnya dalam mendeteksi kasus yang seharusnya diidentifikasi.
+Berdasarkan grafik performa model dengan evaluasi RMSE, model menunjukkan performa yang baik, ditandai dengan rendahnya nilai RMSE. Interpretasi hasil juga dapat dilihat pada bagian **Modeling**, di mana model **Recommender Net** yang telah dilatih mampu menghasilkan rekomendasi buku yang bervariasi dan sesuai dengan preferensi pengguna.
 
-   Formula:  
-   ![recall](https://github.com/user-attachments/assets/ebe9c1cb-9f15-4b9f-b6c9-be93119716c8)
-
-
-4. **F1-Score**  
-   F1-Score adalah rata-rata harmonis antara Precision dan Recall. Metrik ini memberikan gambaran yang lebih seimbang antara Precision dan Recall, terutama saat data tidak seimbang atau ketika keseimbangan antara keduanya penting.
-
-   Formula:  
-   ![f1score](https://github.com/user-attachments/assets/c8f589c2-2ca9-4b51-a431-b4c065728ca0)
-
-
-#### Hasil Evaluasi Berdasarkan Metrik
-
-Setelah melatih dan menguji ketiga model, berikut adalah hasil evaluasi berdasarkan metrik yang telah dijelaskan:
-![model_evaluation](https://github.com/user-attachments/assets/127e5fe3-6e8f-4409-8d55-9670447d4f63)
-
-
-
-- **CatBoost**:
-
-  - **Akurasi**: 95%
-  - **Precision**: 95%
-  - **Recall**: 95%
-  - **F1-Score**: 95%
-
-  CatBoost menunjukkan kinerja yang sangat baik dengan akurasi, precision, recall, dan F1-Score yang semuanya mencapai 95%. Model ini berhasil mengenali pola dalam data dengan sangat baik, membuatnya ideal untuk digunakan dalam kasus ini.
-
-- **AdaBoost**:
-
-  - **Akurasi**: 72%
-  - **Precision**: 77%
-  - **Recall**: 72%
-  - **F1-Score**: 72%
-
-  Meskipun AdaBoost memberikan hasil yang cukup baik, kinerjanya lebih rendah dibandingkan dengan CatBoost. Akurasi dan recall-nya lebih rendah, menunjukkan bahwa model ini lebih sering melewatkan data positif yang seharusnya terdeteksi.
-
-- **Random Forest**:
-
-  - **Akurasi**: 88%
-  - **Precision**: 88%
-  - **Recall**: 88%
-  - **F1-Score**: 88%
-
-  Random Forest juga memberikan hasil yang baik, namun masih kalah dibandingkan dengan CatBoost. Precision, recall, dan F1-Score pada model ini sedikit lebih rendah daripada CatBoost, meskipun tetap stabil dan robust terhadap data.
-
-#### Model Terbaik
-
-Berdasarkan hasil evaluasi yang telah dijelaskan di atas, **CatBoost** dipilih sebagai model terbaik untuk proyek ini. CatBoost menunjukkan kinerja yang lebih unggul dalam semua metrik evaluasi, dengan akurasi dan recall tertinggi, serta kestabilan yang baik terhadap noise. Keunggulannya dalam menangani fitur kategori dan mengurangi overfitting pada data yang kompleks membuatnya menjadi pilihan terbaik untuk solusi ini.
 
 ---
 
----
