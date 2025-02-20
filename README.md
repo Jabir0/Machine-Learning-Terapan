@@ -2,12 +2,11 @@
 
 ## Project Overview
 
-Sistem rekomendasi telah menjadi bagian penting dalam berbagai industri, terutama dalam bidang e-commerce dan hiburan. Dengan semakin meningkatnya jumlah buku yang tersedia secara daring, pengguna sering kali kesulitan menemukan buku yang sesuai dengan preferensi mereka. Oleh karena itu, sistem rekomendasi buku menjadi solusi untuk membantu pengguna menemukan buku yang relevan berdasarkan data historis dan perilaku mereka.
+Sistem rekomendasi telah menjadi bagian penting dalam berbagai industri, terutama dalam bidang e-commerce dan hiburan. Dengan semakin meningkatnya jumlah buku yang tersedia secara daring, pengguna sering kali kesulitan menemukan buku yang sesuai dengan preferensi mereka. Oleh karena itu, Sistem rekomendasi buku menjadi solusi untuk membantu pengguna menemukan buku yang relevan berdasarkan data historis dan perilaku mereka **[1]**.
 
-Dataset yang digunakan dalam proyek ini berasal dari [Kaggle - Book Recommendation Dataset](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset), yang dikumpulkan dari komunitas Book-Crossing pada tahun 2004. Dataset ini terdiri dari tiga bagian utama: data pengguna, data buku, dan data rating buku.
 
-Referensi terkait:
-- [T. Monisya Afriyanti and E. Retnoningsih, “Sistem Rekomendasi Buku Perpustakaan Menggunakan Algoritma Frequent Pattern Growth Library Book Recommendation System using Frequent Pattern Growth Algorithm,” Techno.COM, vol. 21, no. 2, pp. 292–310, May 2022.](https://core.ac.uk/download/pdf/521875503.pdf)
+Referensi :
+- [**[1]**. T. Monisya Afriyanti and E. Retnoningsih, “Sistem Rekomendasi Buku Perpustakaan Menggunakan Algoritma Frequent Pattern Growth Library Book Recommendation System using Frequent Pattern Growth Algorithm,” Techno.COM, vol. 21, no. 2, pp. 292–310, May 2022.](https://core.ac.uk/download/pdf/521875503.pdf)
 
 ## Business Understanding
 
@@ -37,9 +36,9 @@ Untuk membangun sistem rekomendasi buku yang efektif, pendekatan berikut digunak
    - **Collaborative Filtering** dievaluasi menggunakan **Root Mean Squared Error (RMSE)** untuk mengukur akurasi prediksi rating yang diberikan oleh model.  
 ---
 
-## **Data Understanding**  
+## **Data Understanding** 
 
-Dataset yang digunakan dalam proyek ini terdiri dari tiga file utama:  
+Dataset yang digunakan dalam proyek ini berasal dari [Kaggle - Book Recommendation Dataset](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset), yang dikumpulkan dari komunitas Book-Crossing pada tahun 2004. Dataset ini terdiri dari tiga bagian utama: data pengguna, data buku, dan data rating buku.
 
 ### **1. Users.csv**  
 Berisi informasi tentang pengguna yang memberikan rating buku. Dataset ini memiliki **278.858 entri** dengan tiga kolom utama:  
@@ -74,14 +73,15 @@ Berisi data rating buku yang diberikan oleh pengguna dengan total **1.149.780 en
 5. Terdapat perbedaan jumlah buku dan ISBN, yang kemungkinan disebabkan oleh **keberadaan beberapa versi berbeda dari buku yang sama** (misalnya edisi berbeda, cetakan ulang, atau format yang berbeda seperti paperback dan hardcover).  
 
 ---
-# **Data Preparation**  
+
+## **Data Preparation**  
 
 Sebelum data digunakan untuk membangun model rekomendasi, dilakukan beberapa langkah **persiapan data** untuk memastikan kualitas dan efisiensi pemrosesan.  
 
 ### **1. Data Merging**  
-Untuk menghubungkan data rating dengan informasi buku, dilakukan **penggabungan (merging) data** antara dataset **ratings** dan **books** berdasarkan ISBN. Hal ini bertujuan untuk menambahkan informasi tambahan seperti judul buku, penulis, dan penerbit ke dalam dataset rating.  
+Langkah pertama adalah **menggabungkan (merging) dataset** untuk menghubungkan data rating dengan informasi buku. Penggabungan dilakukan antara dataset **ratings** dan **books** berdasarkan **ISBN** agar setiap rating memiliki informasi tambahan seperti **judul buku, penulis, dan penerbit**.  
 
-Kode yang digunakan untuk melakukan **data merging**:  
+Kode untuk melakukan merging:  
 ```python
 data_rating_buku = pd.merge(
     ratings,
@@ -89,35 +89,40 @@ data_rating_buku = pd.merge(
     on = 'ISBN',
     how = 'left'
 )
-data_rating_buku
 ```
-Metode **left join** digunakan agar setiap entri rating tetap dipertahankan, meskipun beberapa ISBN mungkin tidak ditemukan dalam dataset buku.  
+Metode **left join** digunakan agar semua entri rating tetap dipertahankan meskipun beberapa ISBN mungkin tidak ditemukan dalam dataset buku.  
 
-### **2. Missing Values Handling**  
-Beberapa kolom dalam dataset memiliki **nilai yang hilang (missing values)**. Untuk mengatasi hal ini, dilakukan **penghapusan (drop)** entri yang memiliki nilai kosong, terutama pada kolom-kolom penting seperti **judul buku (Book-Title)** dan **penulis (Book-Author)**.  
+---
+
+### **2. Handling Missing Values**  
+Dataset yang digunakan memiliki beberapa kolom dengan **nilai yang hilang (missing values)**. Untuk memastikan kualitas data, dilakukan **penghapusan** entri yang memiliki nilai kosong pada kolom **judul buku (Book-Title)** dan **penulis (Book-Author)**.  
 
 ```python
 data_rating_buku = data_rating_buku.dropna()
 ```
 
-### **3. Duplicates Data Handling**  
-Data yang memiliki **duplikasi (duplicate entries)** dapat memengaruhi hasil model. Oleh karena itu, dilakukan **penghapusan duplikasi** berdasarkan kombinasi **User-ID dan ISBN** untuk memastikan bahwa setiap pengguna hanya memberikan satu rating untuk satu buku.  
+---
+
+### **3. Handling Duplicate Data**  
+Beberapa data memiliki **duplikasi (duplicate entries)** yang dapat memengaruhi akurasi model rekomendasi. Oleh karena itu, dilakukan **penghapusan duplikasi** berdasarkan **ISBN** dan **judul buku (Book-Title)** untuk memastikan setiap buku hanya direpresentasikan satu kali.  
 
 ```python
-#Menghitung jumlah data yang duplikat
+# Menghitung jumlah duplikasi
 duplicate_count_isbn = data_rating_buku['ISBN'].duplicated().sum()
 duplicate_count_title = data_rating_buku['Book-Title'].duplicated().sum()
 
-print(f"Number of duplicates in the 'ISBN' column : {duplicate_count_isbn}")
-print(f"Number of duplicated in the 'Book-Title' column : {duplicate_count_title}")
+print(f"Jumlah duplikasi di kolom ISBN: {duplicate_count_isbn}")
+print(f"Jumlah duplikasi di kolom Judul Buku: {duplicate_count_title}")
 
-#Menghapus data yang duplikat
+# Menghapus data yang duplikat
 data_rating_buku = data_rating_buku.drop_duplicates(subset='ISBN')
 data_rating_buku = data_rating_buku.drop_duplicates(subset='Book-Title')
 ```
 
+---
+
 ### **4. Data Selection**  
-Dataset ini memiliki **241.065 entri**, yang cukup besar untuk diproses. Demi efisiensi serta mempertimbangkan keterbatasan penyimpanan di **Kaggle**, hanya digunakan **30.000 entri teratas** berdasarkan jumlah rating yang diberikan oleh pengguna.  
+Dataset ini memiliki **241.065 entri**, yang cukup besar untuk diproses. Untuk efisiensi dan keterbatasan penyimpanan di **Kaggle**, hanya digunakan **30.000 entri teratas**, yang dipilih berdasarkan jumlah rating yang diberikan oleh pengguna.  
 
 ```python
 data_rating_buku = data_rating_buku.head(30000)
@@ -127,53 +132,90 @@ data_rating_buku = data_rating_buku.head(30000)
 
 ## **Data Preparation - Collaborative Filtering**  
 
-Sistem rekomendasi yang akan dibangun menggunakan pendekatan **Collaborative Filtering**. Sebelum memasuki tahap pelatihan model, dilakukan beberapa proses tambahan:  
+Pendekatan pertama dalam sistem rekomendasi ini menggunakan **Collaborative Filtering**. Sebelum membangun model, dilakukan beberapa proses tambahan:
 
-1. **Encoding dan Mapping**  
-   - Mengonversi data menjadi format numerik agar dapat diproses oleh model.  
-   - ISBN dan User-ID dikonversi ke dalam indeks numerik untuk mempermudah pemrosesan.  
+### **5. Encoding dan Mapping**  
+Agar model dapat memproses data dengan lebih efisien, dilakukan **pengonversian data ke format numerik**.  
+- **User-ID** dan **Book-Title** dikonversi ke indeks numerik menggunakan dictionary mapping.  
 
-   ```python
-   # Mendapatkan daftar user ID yang unik
-    user_ids = df['User-ID'].unique().tolist()
+```python
+# Mendapatkan daftar user ID yang unik
+user_ids = data_rating_buku['User-ID'].unique().tolist()
 
-    # Membuat encoding user ID
-    encode_user_id1 = {user_id: index for index, user_id in enumerate(user_ids)}
-    encoded_user_id2 = {index: user_id for index, user_id in enumerate(user_ids)}
+# Membuat encoding user ID
+encode_user_id1 = {user_id: index for index, user_id in enumerate(user_ids)}
+encoded_user_id2 = {index: user_id for index, user_id in enumerate(user_ids)}
 
-    # Mendapatkan daftar judul buku yang unik
-    titles = df['Book-Title'].unique().tolist()
+# Mendapatkan daftar judul buku yang unik
+titles = data_rating_buku['Book-Title'].unique().tolist()
 
-    # Membuat encoding untuk judul buku
-    encode_title1 = {title: index for index, title in enumerate(titles)}
-    encoded_title2 = {index: title for index, title in enumerate(titles)}
+# Membuat encoding untuk judul buku
+encode_title1 = {title: index for index, title in enumerate(titles)}
+encoded_title2 = {index: title for index, title in enumerate(titles)}
 
-    #Mengubah kolom user dan books dengan menggunakan peta encode
-    df['user'] = df['User-ID'].apply(lambda x : encode_user_id1[x])
-    df['books'] = df['Book-Title'].apply(lambda x : encode_title1[x])
-   ```
+# Mengubah kolom user dan books dengan peta encoding
+data_rating_buku['user'] = data_rating_buku['User-ID'].apply(lambda x: encode_user_id1[x])
+data_rating_buku['books'] = data_rating_buku['Book-Title'].apply(lambda x: encode_title1[x])
+```
 
-2. **Pengambilan Sampel Acak**  
-   - Untuk memastikan distribusi data yang lebih merata, dilakukan pemilihan sampel data secara acak.  
+---
 
-   ```python
-   df = df.sample(frac = 1, random_state = 123)
-   ```
+### **6. Pengambilan Sampel Acak**  
+Agar distribusi data lebih merata, dilakukan pemilihan sampel data secara acak dengan **random state** untuk replikasi hasil yang konsisten.  
 
-3. **Pembagian Data Latih dan Uji**  
-   - Data dibagi menjadi **train set (80%)** dan **test set (20%)** untuk mengevaluasi performa model.  
+```python
+data_rating_buku = data_rating_buku.sample(frac=1, random_state=123)
+```
 
-   ```python
-   #Menampung nilai dari kolom 'user' dan 'books' dalan variabel x
-    x = df[['user','books']].values
-    #Normalisasi nilai 'Book-Rating'
-    y = df['Book-Rating'].apply(lambda rating: (rating - min_rating) / (max_rating - min_rating))
+---
 
-    #Membagi data menjadi training dan validation set
-    split_index = int(0.8 * len(df))
-    x_train, x_val = x[:split_index], x[split_index:]
-    y_train,y_val = y[:split_index], y[split_index:]
-   ```
+### **7. Pembagian Data Latih dan Uji**  
+Data dibagi menjadi **train set (80%)** dan **test set (20%)** untuk mengevaluasi performa model.  
+
+```python
+# Menyiapkan fitur dan label
+x = data_rating_buku[['user', 'books']].values
+y = data_rating_buku['Book-Rating'].apply(lambda rating: (rating - min_rating) / (max_rating - min_rating))
+
+# Membagi data menjadi training dan validation set
+split_index = int(0.8 * len(data_rating_buku))
+x_train, x_val = x[:split_index], x[split_index:]
+y_train, y_val = y[:split_index], y[split_index:]
+```
+
+---
+
+## **Data Preparation - Content-Based Filtering**  
+
+Pendekatan kedua menggunakan **Content-Based Filtering**, yang memanfaatkan **teknik TF-IDF (Term Frequency-Inverse Document Frequency)** untuk mengekstrak fitur dari teks judul buku.  
+
+### **8. Ekstraksi Fitur dengan TF-IDF**  
+Ekstraksi fitur dengan **TF-IDF** dilakukan untuk mengukur **pentingnya sebuah kata** dalam judul buku relatif terhadap kumpulan dokumen lainnya.  
+
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Inisialisasi TfidfVectorizer
+vectorizer = TfidfVectorizer()
+
+# Melatih Vectorizer pada kolom 'Titles'
+vectorizer.fit(data_rating_buku['Book-Title'])
+
+# Mendapatkan fitur nama yang dihasilkan
+feature_names = vectorizer.get_feature_names_out()
+print(feature_names)
+
+# Menstranformasi data 'Titles' menggunakan TF-IDF
+tfidf_matrix = vectorizer.fit_transform(data_rating_buku['Book-Title'])
+
+# Mendapatkan bentuk dari tfidf_matrix
+print(tfidf_matrix.shape)
+```
+Pada tahap ini:
+- **TfidfVectorizer** digunakan untuk mengubah teks judul buku menjadi vektor numerik.  
+- Setiap kata dalam judul buku diberi bobot berdasarkan frekuensinya dalam dataset.  
+- Matriks hasil transformasi akan digunakan sebagai fitur dalam sistem rekomendasi berbasis konten.  
+
 
 ---
 ## **Modeling**  
@@ -248,14 +290,40 @@ Model Content-Based Filtering dievaluasi menggunakan **Cosine Similarity**, yang
 
 ![cosine_similarity](https://github.com/user-attachments/assets/3075e829-fc23-4a83-867d-02161db0711a)
 
-
 di mana:  
 - \( A \) dan \( B \) adalah vektor representasi TF-IDF dari dua buku yang dibandingkan.  
 - Nilai berkisar antara **0 hingga 1** (semakin mendekati 1, semakin mirip).  
 
+#### **Precision@K untuk Evaluasi**  
+Selain Cosine Similarity, evaluasi juga menggunakan **Precision@K** untuk mengukur relevansi rekomendasi. Precision@K menghitung persentase buku yang relevan di antara K rekomendasi teratas. 
+
+##### **Formula Precision@K:**  
+
+![presisi_rekomendasi](https://github.com/user-attachments/assets/3359975a-2bca-4b32-853f-7eb957e4463f)
+
+
 #### **Interpretasi Hasil:**  
 - Jika nilai cosine similarity tinggi, rekomendasi yang dihasilkan dianggap relevan.  
-- Model diuji dengan membandingkan hasil rekomendasi terhadap buku-buku yang telah dinilai pengguna sebelumnya.  
+- Precision@K membantu mengukur seberapa baik sistem dalam memberikan rekomendasi yang benar di antara K rekomendasi teratas.  
+- Model diuji dengan membandingkan hasil rekomendasi terhadap buku-buku yang telah dinilai pengguna sebelumnya atau menggunakan similarity matching untuk menangani variasi dalam judul buku.
+
+#### **Visualisasi Kinerja Model Content-Based Filtering menggunakan presisi@k:**
+
+![Visualisasi Kinerja Model Content-Based Filtering menggunakan presisi@k](https://github.com/user-attachments/assets/3a6dae12-b9b3-4519-9184-84b405a711c3)
+
+Precision@K untuk Content-based Filtering pada percobaan ini sering bernilai 0 karena pencocokan judul untuk sistem rekomendasi dilakukan secara persis atau terlalu ketat harus sama dengan judul dari buku yang ingin dicari rekomendasinya, sehingga variasi kecil dalam judul membuat rekomendasi dianggap tidak relevan. Selain itu, jika buku target tidak ada dalam dataset evaluasi, precision otomatis menjadi 0%. Solusinya, saya menggunakan similarity matching seperti substring matching atau fuzzy matching untuk mempertimbangkan kemiripan judul dengan ambang batas 70%.
+
+```python
+from rapidfuzz import fuzz
+
+def is_relevant(recommended_title, target_title, threshold=70):
+    """
+    Cek apakah buku direkomendasikan cukup mirip dengan target title.
+    """
+    return fuzz.partial_ratio(recommended_title.lower(), target_title.lower()) >= threshold
+```
+
+Dari hasil evaluasi Content-Based Filtering, model berhasil merekomendasikan 2 buku yang relevan dari 5 buku yang ditampilkan sebagai rekomendasi. Dengan nilai presisi 2/5 = 0.4 atau 40%
 
 ---
 
@@ -273,7 +341,10 @@ di mana:
 - Semakin kecil nilai RMSE, semakin akurat prediksi model.  
 
 #### **Visualisasi Kinerja Model dalam Metode Evaluasi RMSE:**  
-![rekomendernet_collaborative_evaluation](https://github.com/user-attachments/assets/6d3b4f3a-ad2d-4234-aa89-baeab8a84005)
+
+![rmse_rekomender_net](https://github.com/user-attachments/assets/815acac0-9c40-4f1c-9c98-15b9777dcb57)
+
+
 
 - Jika RMSE rendah, berarti prediksi model mendekati rating sebenarnya yang diberikan pengguna.  
 
